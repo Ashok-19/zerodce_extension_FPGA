@@ -10,7 +10,7 @@ This project is inspired from [FPGA-OwlsEye](https://github.com/Gaurav-Shah05/FP
 In FPGA-Owlseye, the ZeroDCE model was originally mapped to ARM processor of Zynq Ultrascale zcu104 board. This project focuses on mapping the ZeroDCE++ model to DPU (Deep Learning Processing Units) of the zcu104 board. The reason why ZeroDCE++ is chosen instead of ZeroDCE is because the difference between number of params while providing same results.
 
    			ZeroDCE    - ~80k params
-      			ZerodDCE++ - 10561 params
+      		ZerodDCE++ - 10561 params
 
 
 Some key changes are made in the original design of the model to map it to DPU. It's mentioned
