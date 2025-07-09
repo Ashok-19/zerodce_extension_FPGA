@@ -13,7 +13,7 @@ In FPGA-Owlseye, the ZeroDCE model was originally mapped to ARM processor of Zyn
       		ZerodDCE++ - 10561 params
 
 
-Some key changes are made in the original design of the model to map it to DPU. It's mentioned
+Some key changes are made in the original design of the model to map it to DPU. 
 
 
 
