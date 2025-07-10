@@ -7,13 +7,12 @@ Porting image enhancement model ZeroDCE++ on DPU accelerated FPGA devices such a
 
 This project is inspired from [FPGA-OwlsEye](https://github.com/Gaurav-Shah05/FPGA-OwlsEye.git).
 
-In FPGA-Owlseye, the ZeroDCE model was originally mapped to ARM processor of Zynq Ultrascale zcu104 board. This project focuses on mapping the ZeroDCE++ model to DPU (Deep Learning Processing Units) of the zcu104 board. The reason why ZeroDCE++ is chosen instead of ZeroDCE is because the difference between number of params while providing same results.
+In FPGA-Owlseye, the ZeroDCE model was originally mapped to ARM processor of Zynq Ultrascale zcu104 board. This project focuses on mapping the ZeroDCE++ model to DPU (Deep Learning Processing Units) of the zcu104 board.The reason why ZeroDCE++ is chosen instead of ZeroDCE is because the difference between number of params while providing same results.
+    
+        ZeroDCE   - ~80K params
+        ZeroDCE++ - ~10K params
 
-   			ZeroDCE    - ~80k params
-      		ZerodDCE++ - 10561 params
-
-
-Some key changes are made in the original design of the model to map it to DPU. 
+Some key changes are made in the original design of the model to map it to DPU.
 
 
 
@@ -28,7 +27,10 @@ Original [ZeroDCE++](https://github.com/Li-Chongyi/Zero-DCE_extension.git) model
 
         torch.pow(x, 2) = torch.mul(x, x)
 
-# Prerequisites:
+
+![Tanh_approximation](https://github.com/Ashok-19/zerodce_extension_FPGA/blob/22482e414fae7766ecaf7d2c2031815155d0839c/screenshots/tanh_approx.png)
+
+## Prerequisites:
 
 * Ubuntu 20.04 or 22.04
 
@@ -67,6 +69,87 @@ Default parameters for training :
 ## Testing the model
 
     python low_light_test.py
+
+
+
+# Vitis-AI workflow
+
+Activate the docker and conda environment in Vitis AI. Then follow the steps below,
+
+It's recommended to install jupyter-lab inside the docker environment for better experience
+
+
+    # create a directory for zerodce under src/vai_quantizer/vai_q_pytorch/
+
+    mkdir zdce_extension
+    
+
+In this directory, move the entire [compile_for_dpu](https://github.com/Ashok-19/zerodce_extension_FPGA/tree/22482e414fae7766ecaf7d2c2031815155d0839c/zdce_extension_fpga/compile_for_dpu) folder.
+
+
+## Inspection
+
+Inspect the model to confirm all the operators are mapped to DPU. If any of the operators were not mapped, either wrap them as a custom operator or approximate them using supported DPU operations.
+
+Target -> DPUCZDX8G_ISA1_B4096 (ZCU104)
+
+Target is specified in the code itself, no need to mention it explicitly.
+
+    python zdce.py --mode float --inspect
+
+By running the above command, you should get a result that says "All operations are mapped to DPU".
+
+A dot image will be created in the /inspect folder.
+
+
+## Calibration
+
+Calibrate the model by using calib data provided in data folder.
+
+    python zdce.py --mode calib
+
+
+This calibrates the model and creates a quant_info.json
+
+
+## Testing and Deployment
+
+    python zdce.py --mode test --deploy
+
+This step quantizes the model and creates .pt , .onnx and .xmodel files of ZeroDCE++.
+
+Inspect the xmodel file in [netron](https://netron.app/) to see the structure and workflow of the model.
+
+
+## Compiling the xmodel
+
+Compile the xmodel for the board specific architecture using the following command,
+
+
+    vai_c_xir -x <xmodel_file_path> -a /opt/vitis_ai/compiler/arch/DPUCZDX8G/ZCU104/arch.json -o <output_directory> -n <netname>
+
+
+The xmodel file will be compiled to board specific architecture with the name provided as <netname> in <output_directory>
+
+
+To create the graph of this compiled model, use the following command,
+
+    xdputil xmodel <compiled_xmodel> -s <name_for_svg_file>
+
+
+All the output and compiled files are already provided in the repository.
+
+
+# Board Setup and working
+
+
+
+
+    
+
+
+
+
 
 
 
